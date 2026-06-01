@@ -20,10 +20,10 @@ ALLOWED_ORIGINS = ["*"] if ENVIRONMENT == "development" else [
     "https://attendx.vercel.app",
     os.getenv("FRONTEND_URL", ""),
 ]
-# Also allow Railway-assigned domain if present
-for var in ("RAILWAY_PUBLIC_DOMAIN", "RAILWAY_STATIC_URL"):
+# Also allow platform-assigned domain (Render / Railway)
+for var in ("RENDER_EXTERNAL_URL", "RAILWAY_PUBLIC_DOMAIN", "RAILWAY_STATIC_URL"):
     if val := os.getenv(var):
-        ALLOWED_ORIGINS.append(f"https://{val}")
+        ALLOWED_ORIGINS.append(f"https://{val}" if not val.startswith("https://") else val)
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,7 +43,7 @@ app.include_router(subjects.router, prefix="/subjects", tags=["Subjects"])
 app.include_router(timetable.router, prefix="/timetable", tags=["Timetable"])
 
 
-# ── Entry point — used by Railway ─────────────────────────────
+# ── Entry point — used by Render / Railway ────────────────────
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8000))

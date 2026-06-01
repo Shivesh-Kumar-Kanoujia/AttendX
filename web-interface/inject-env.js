@@ -4,7 +4,7 @@
  * at build time so the static SPA can read runtime configuration.
  *
  * Vercel environment variables used:
- *   ATTENDX_API_URL  — Railway backend URL (e.g. https://attendx-api.up.railway.app)
+ *   ATTENDX_API_URL  — Backend URL (e.g. https://attendx-api.onrender.com)
  */
 
 const fs = require("fs");

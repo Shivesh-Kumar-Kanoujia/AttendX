@@ -49,6 +49,20 @@
  *    equality filters on the document ID.
  * 
  * ─────────────────────────────────────────────────────────────
+ *
+ * ── DEPLOYMENT ────────────────────────────────────────────────
+ * Frontend → Vercel
+ *   - Push repo, Vercel auto-detects from vercel.json
+ *   - Set env var: ATTENDX_API_URL = https://your-backend.onrender.com
+ *
+ * Backend  → Render
+ *   - Connect repo, set root to `backend/`
+ *   - Build command: pip install -r requirements.txt
+ *   - Start command: uvicorn main:app --host 0.0.0.0 --port $PORT
+ *   - Set env vars: ENVIRONMENT=production, FRONTEND_URL, and Firebase creds
+ *   - Render auto-assigns *.onrender.com — CORS already handles it
+ *
+ * ─────────────────────────────────────────────────────────────
  */
 
 import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
