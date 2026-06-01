@@ -1,0 +1,8 @@
+{
+  "name": "attendx-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node math.test.js"
+  }
+}

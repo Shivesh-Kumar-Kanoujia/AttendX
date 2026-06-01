@@ -1,0 +1,408 @@
+/* ============================================================
+   AttendX — style.css
+   Off-white + black glassmorphism theme
+   ============================================================ */
+
+/* ── Google Font already loaded via HTML ── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Root Variables ──────────────────────────────────────── */
+:root {
+  --ink:      #111111;
+  --offwhite: #f8f8f8;
+  --muted:    #888888;
+  --soft:     #e5e5e5;
+  --danger:   #dc2626;
+  --success:  #16a34a;
+  --warn:     #d97706;
+}
+
+/* ── Base ────────────────────────────────────────────────── */
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--offwhite);
+  background-image:
+    radial-gradient(ellipse at 15% 15%, rgba(180, 180, 180, 0.35) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 80%, rgba(140, 140, 140, 0.20) 0%, transparent 55%);
+  min-height: 100vh;
+  color: var(--ink);
+}
+
+/* ── Glassmorphism Helpers ───────────────────────────────── */
+.glass-nav {
+  background: rgba(248, 248, 248, 0.80);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(200, 200, 200, 0.45);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.80);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 1.5px 6px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.glass-result {
+  background: rgba(245, 245, 245, 0.60);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(200, 200, 200, 0.50);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Inputs ──────────────────────────────────────────────── */
+.custom-input {
+  background: rgba(248, 248, 248, 0.75);
+  border: 1.5px solid rgba(180, 180, 180, 0.50);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+}
+
+.custom-input:hover:not(:focus) {
+  border-color: rgba(100, 100, 100, 0.50);
+}
+
+.custom-input:focus {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.07);
+}
+
+/* Remove number input arrows */
+.custom-input::-webkit-outer-spin-button,
+.custom-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.custom-input[type=number] { -moz-appearance: textfield; }
+
+/* ── Field Labels ────────────────────────────────────────── */
+.field-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 0.45rem;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn-primary {
+  background: var(--ink);
+  color: var(--offwhite);
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.18);
+}
+
+.btn-primary:hover {
+  background: #2a2a2a;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.22);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+}
+
+/* ── Tab Navigation ──────────────────────────────────────── */
+.tab-btn {
+  padding: 0.45rem 1.1rem;
+  border-radius: 1rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: var(--ink);
+  background: rgba(255,255,255,0.65);
+}
+
+.tab-active {
+  background: white !important;
+  color: var(--ink) !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ── Progress Bar ────────────────────────────────────────── */
+.progress-track {
+  background: rgba(200, 200, 200, 0.40);
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+  margin-top: 0.6rem;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-safe   { background: var(--ink); }
+.progress-danger { background: var(--danger); }
+.progress-warn   { background: var(--warn); }
+
+/* ── Subject Card ────────────────────────────────────────── */
+.subject-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.subject-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.11),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+/* ── Subject List Row (in Subjects tab) ─────────────────── */
+.subject-row {
+  transition: transform 0.15s ease;
+}
+
+.subject-row:hover {
+  transform: translateX(3px);
+}
+
+/* ── Toast ───────────────────────────────────────────────── */
+.toast-msg {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(4rem);
+  background: var(--ink);
+  color: var(--offwhite);
+  padding: 0.65rem 1.4rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.3s ease;
+  z-index: 9999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  white-space: nowrap;
+}
+
+.toast-msg.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Stat Pill (Quick Calc) ──────────────────────────────── */
+.stat-pill {
+  transition: transform 0.2s ease;
+}
+
+.stat-pill:hover {
+  transform: translateY(-2px);
+}
+
+/* ── Quick Result Hidden State ───────────────────────────── */
+#quick-result.hidden {
+  display: none;
+}
+
+/* ── Animations ──────────────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.anim-in {
+  animation: fadeSlideUp 0.35s ease forwards;
+}
+
+/* ── Badge States ────────────────────────────────────────── */
+.badge-safe {
+  background: rgba(22, 163, 74, 0.10);
+  color: var(--success);
+}
+
+.badge-danger {
+  background: rgba(220, 38, 38, 0.09);
+  color: var(--danger);
+}
+
+.badge-warn {
+  background: rgba(217, 119, 6, 0.09);
+  color: var(--warn);
+}
+
+/* ── Responsive Tweaks ───────────────────────────────────── */
+@media (max-width: 480px) {
+  .tab-btn { padding: 0.4rem 0.75rem; font-size: 0.72rem; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUTH STYLES
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Loading overlay (shown during auth state check) ─────── */
+.auth-loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--offwhite);
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+}
+
+.auth-loading-overlay.hidden {
+  display: none;
+}
+
+/* ── Spinner ─────────────────────────────────────────────── */
+.auth-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(17, 17, 17, 0.12);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Login Screen ────────────────────────────────────────── */
+.auth-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(180, 180, 180, 0.35) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 75%, rgba(140, 140, 140, 0.20) 0%, transparent 55%),
+    var(--offwhite);
+  z-index: 1000;
+}
+
+.auth-screen.hidden {
+  display: none;
+}
+
+/* ── Auth Card ───────────────────────────────────────────── */
+.auth-card {
+  /* Inherits .glass-card — just width / layout extras */
+  width: 100%;
+}
+
+/* ── Google Button ───────────────────────────────────────── */
+.google-btn {
+  background: white;
+  border: 1.5px solid rgba(180, 180, 180, 0.55);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+}
+
+.google-btn:hover {
+  background: #fafafa;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.google-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Auth Divider ────────────────────────────────────────── */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(180, 180, 180, 0.50);
+}
+
+/* ── Auth Mode Toggle (Sign In / Create Account tabs) ────── */
+#tab-signin.tab-active,
+#tab-register.tab-active {
+  background: white !important;
+  color: var(--ink) !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* ── User Avatar in Nav ──────────────────────────────────── */
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ── Sync status indicator ───────────────────────────────── */
+.sync-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* ── Responsive auth tweaks ──────────────────────────────── */
+@media (max-width: 480px) {
+  .auth-card { padding: 1.75rem 1.5rem; }
+}

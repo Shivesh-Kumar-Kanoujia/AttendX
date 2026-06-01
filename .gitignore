@@ -1,0 +1,28 @@
+# Secrets — never commit
+serviceaccountkey.json
+backend/serviceaccountkey.json
+backend/.env
+.env
+*.key
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Firebase / Node
+node_modules/
+.firebase/
+
+# Python
+__pycache__/
+*.pyc
+env/
+.env/
+venv/
+.venv/

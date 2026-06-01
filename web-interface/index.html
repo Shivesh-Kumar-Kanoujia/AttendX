@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AttendX — Smart Attendance Manager</title>
+  <meta name="description"
+    content="Track attendance subject-wise, predict bunkable classes, and visualize your academic standing with AttendX." />
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://apis.google.com 'unsafe-inline' 'unsafe-eval';
+    style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+    font-src https://fonts.gstatic.com;
+    img-src 'self' data: https:;
+    connect-src 'self' https://identitytoolkit.googleapis.com https://firestore.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://fonts.googleapis.com https://*.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com *;
+    frame-src https://www.gstatic.com;
+  ">
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS (generated) -->
+  <link href="tailwind.css" rel="stylesheet">
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="timetable.css" />
+</head>
+
+<body class="font-sans min-h-screen bg-offwhite">
+
+  <!-- ══════════════════════════════════════════════════════════
+       AUTH OVERLAY — shown while checking auth state
+       ══════════════════════════════════════════════════════════ -->
+  <div id="auth-loading" class="auth-loading-overlay">
+    <div class="auth-spinner"></div>
+    <p class="text-muted text-sm mt-4 font-medium">Loading AttendX…</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       LOGIN SCREEN — shown when guest clicks Sign In
+       ══════════════════════════════════════════════════════════ -->
+  <div id="login-screen" class="auth-screen hidden">
+    <!-- Back button -->
+    <button onclick="closeLoginScreen()" class="absolute top-6 left-6 w-10 h-10 rounded-2xl bg-white/60 backdrop-blur border border-white/80 flex items-center justify-center text-ink hover:bg-white transition-colors shadow-sm">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+
+    <div class="auth-card glass-card rounded-3xl p-6 sm:p-8 w-full max-w-sm mx-4">
+
+      <!-- Logo + Tagline -->
+      <div class="text-center mb-6">
+        <img src="assets/logo.png" alt="AttendX" class="mx-auto w-12 h-12 object-contain" />
+        <h1 class="text-ink font-bold text-2xl tracking-tight">AttendX</h1>
+        <p class="text-muted text-sm mt-1">Sign in to sync your data</p>
+      </div>
+
+      <!-- Google Sign-In -->
+      <button id="btn-google-login" class="google-btn w-full flex items-center justify-center gap-3 py-3 rounded-2xl text-sm font-semibold mb-5">
+        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <!-- Divider -->
+      <div class="auth-divider">
+        <span>or</span>
+      </div>
+
+      <!-- Mode Toggle Tabs -->
+      <div class="flex bg-soft/60 rounded-2xl p-1 mb-5 gap-1">
+        <button id="tab-signin" class="flex-1 py-2 rounded-xl text-xs font-semibold tab-active transition-all" onclick="setAuthMode('signin')">Sign In</button>
+        <button id="tab-register" class="flex-1 py-2 rounded-xl text-xs font-semibold text-muted transition-all" onclick="setAuthMode('register')">Create Account</button>
+      </div>
+
+      <!-- Display Name (register only) -->
+      <div id="field-displayname" class="hidden mb-3">
+        <label class="field-label">Your Name</label>
+        <input type="text" id="auth-displayname" placeholder="e.g. Shivesh"
+          class="custom-input w-full rounded-2xl px-4 py-3 text-ink text-sm font-medium placeholder-muted" />
+      </div>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <label class="field-label">Email</label>
+        <input type="email" id="auth-email" placeholder="you@example.com"
+          class="custom-input w-full rounded-2xl px-4 py-3 text-ink text-sm font-medium placeholder-muted" />
+      </div>
+
+      <!-- Password -->
+      <div class="mb-4">
+        <label class="field-label">Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••"
+          class="custom-input w-full rounded-2xl px-4 py-3 text-ink text-sm font-medium placeholder-muted" />
+      </div>
+
+      <!-- Error message -->
+      <p id="auth-error" class="text-red-500 text-xs mb-4 hidden font-medium text-center"></p>
+
+      <!-- Submit button -->
+      <button id="btn-email-submit" class="btn-primary w-full py-3 rounded-2xl text-sm font-semibold tracking-wide">
+        Sign In
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MAIN APP — always visible in guest mode
+       ══════════════════════════════════════════════════════════ -->
+  <div id="app-shell" class="hidden">
+
+    <!-- ── NAVBAR ───────────────────────────────────────────── -->
+    <nav class="glass-nav sticky top-0 z-50 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <!-- Logo -->
+      <div class="flex items-center gap-2 shrink-0">
+        <img src="assets/logo.png" alt="AttendX" class="w-8 h-8 object-contain" />
+        <span class="text-ink font-bold text-base sm:text-lg tracking-tight">AttendX</span>
+      </div>
+
+      <!-- Tab nav — hide on very small screens -->
+      <div class="flex items-center gap-1 bg-soft/60 rounded-2xl p-1 hidden sm:flex">
+        <button id="tab-dashboard" class="tab-btn tab-active" onclick="switchTab('dashboard')">Dashboard</button>
+        <button id="tab-subjects"  class="tab-btn"            onclick="switchTab('subjects')">Subjects</button>
+        <button id="tab-quick"     class="tab-btn"            onclick="switchTab('quick')">Quick Calc</button>
+        <button id="tab-timetable" class="tab-btn"            onclick="switchTab('timetable')">Timetable</button>
+      </div>
+
+      <!-- Mobile tab dropdown — only visible on small screens -->
+      <div class="flex sm:hidden relative">
+        <button onclick="toggleMobileMenu()" class="w-9 h-9 rounded-xl bg-soft/60 flex items-center justify-center text-ink text-lg">
+          ☰
+        </button>
+        <div id="mobile-menu" class="hidden absolute right-0 top-12 bg-white rounded-2xl shadow-lg border border-soft overflow-hidden z-50 min-w-[140px]">
+          <button onclick="switchTab('dashboard'); closeMobileMenu()" class="w-full text-left px-4 py-2.5 text-sm hover:bg-soft/60 transition-colors">Dashboard</button>
+          <button onclick="switchTab('subjects'); closeMobileMenu()" class="w-full text-left px-4 py-2.5 text-sm hover:bg-soft/60 transition-colors">Subjects</button>
+          <button onclick="switchTab('quick'); closeMobileMenu()" class="w-full text-left px-4 py-2.5 text-sm hover:bg-soft/60 transition-colors">Quick Calc</button>
+          <button onclick="switchTab('timetable'); closeMobileMenu()" class="w-full text-left px-4 py-2.5 text-sm hover:bg-soft/60 transition-colors">Timetable</button>
+        </div>
+      </div>
+
+      <!-- User section -->
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- Sign In button (guest mode) -->
+        <button id="btn-nav-signin" class="btn-primary px-4 py-2 rounded-xl text-xs font-semibold tracking-wide">
+          Sign In
+        </button>
+        <!-- User info (logged in only) -->
+        <div id="user-info" class="hidden items-center gap-2">
+          <div id="user-avatar" class="user-avatar"></div>
+          <span id="user-name" class="text-ink text-xs font-semibold hidden sm:block truncate max-w-[80px]"></span>
+        </div>
+        <button id="btn-signout" class="text-muted text-xs hover:text-ink transition-colors px-3 py-1.5 rounded-xl hover:bg-soft/60 hidden"
+          title="Sign out">
+          Sign Out
+        </button>
+      </div>
+    </nav>
+
+    <!-- ── MAIN WRAPPER ─────────────────────────────────────── -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+      <!-- ════════════════════════════════════════════════════
+           TAB 1 — DASHBOARD
+           ════════════════════════════════════════════════════ -->
+      <section id="tab-dashboard-content" class="tab-content">
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 flex flex-col gap-1">
+            <p class="text-muted text-[10px] uppercase tracking-widest font-medium">Total Subjects</p>
+            <p id="dash-total-subjects" class="text-ink text-3xl sm:text-4xl font-bold">0</p>
+          </div>
+          <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 flex flex-col gap-1">
+            <p class="text-muted text-[10px] uppercase tracking-widest font-medium">Overall Attendance</p>
+            <p id="dash-overall" class="text-ink text-3xl sm:text-4xl font-bold">—</p>
+          </div>
+          <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 flex flex-col gap-1">
+            <p class="text-muted text-[10px] uppercase tracking-widest font-medium">Subjects at Risk</p>
+            <p id="dash-at-risk" class="text-3xl sm:text-4xl font-bold" style="color:#dc2626">0</p>
+          </div>
+        </div>
+
+        <!-- Subject Cards Grid -->
+        <h2 class="text-ink font-semibold text-base mb-3 sm:mb-4 tracking-tight">Subject Overview</h2>
+        <div id="subject-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Empty state -->
+        <div id="dashboard-empty" class="glass-card rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center hidden">
+          <p class="text-4xl sm:text-5xl mb-3">📚</p>
+          <p class="text-ink font-semibold text-base sm:text-lg mb-1">No subjects yet</p>
+          <p class="text-muted text-sm mb-5">Go to the <strong>Subjects</strong> tab to add your first subject.</p>
+          <button onclick="switchTab('subjects')" class="btn-primary px-5 py-2.5 rounded-2xl text-sm font-semibold">Add Subject</button>
+        </div>
+
+        <!-- Analytics Chart -->
+        <div id="analytics-section" class="mt-6 sm:mt-8 glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 hidden">
+          <h2 class="text-ink font-semibold text-base mb-4 sm:mb-5 tracking-tight">Attendance Analytics</h2>
+          <div class="relative h-[220px] sm:h-[260px]">
+            <canvas id="attendanceChart"></canvas>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════════════════════════════════════════════
+           TAB 2 — SUBJECTS MANAGER
+           ════════════════════════════════════════════════════ -->
+      <section id="tab-subjects-content" class="tab-content hidden">
+
+        <!-- Add Subject Form -->
+        <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 class="text-ink font-semibold text-base mb-4 sm:mb-5 tracking-tight">Add / Update Subject</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <label class="field-label">Subject Name</label>
+              <input type="text" id="sub-name" placeholder="e.g. Mathematics"
+                class="custom-input w-full rounded-xl sm:rounded-2xl px-4 py-3 text-ink text-sm font-medium placeholder-muted" />
+            </div>
+            <div>
+              <label class="field-label">Total Classes</label>
+              <input type="number" id="sub-total" min="0" placeholder="e.g. 60"
+                class="custom-input w-full rounded-xl sm:rounded-2xl px-4 py-3 text-ink text-sm font-medium placeholder-muted" />
+            </div>
+            <div>
+              <label class="field-label">Classes Attended</label>
+              <input type="number" id="sub-attended" min="0" placeholder="e.g. 45"
+                class="custom-input w-full rounded-xl sm:rounded-2xl px-4 py-3 text-ink text-sm font-medium placeholder-muted" />
+            </div>
+            <div>
+              <label class="field-label">Required % (default 75)</label>
+              <input type="number" id="sub-required" min="0" max="100" placeholder="75"
+                class="custom-input w-full rounded-xl sm:rounded-2xl px-4 py-3 text-ink text-sm font-medium placeholder-muted" />
+            </div>
+          </div>
+          <p id="sub-error" class="text-red-500 text-xs mt-3 hidden font-medium"></p>
+          <button onclick="addOrUpdateSubject()" class="btn-primary w-full mt-4 sm:mt-5 py-3 rounded-xl sm:rounded-2xl text-sm font-semibold tracking-wide">
+            + Save Subject
+          </button>
+        </div>
+
+        <!-- Subject List -->
+        <h2 class="text-ink font-semibold text-base mb-3 sm:mb-4 tracking-tight">Your Subjects</h2>
+        <div id="subject-list" class="space-y-2 sm:space-y-3">
+          <!-- Populated by JS -->
+        </div>
+        <div id="subjects-empty" class="glass-card rounded-2xl sm:rounded-3xl p-8 sm:p-10 text-center">
+          <p class="text-3xl sm:text-4xl mb-3">🎓</p>
+          <p class="text-muted text-sm">No subjects added yet. Fill the form above to get started.</p>
+        </div>
+
+      </section>
+
+      <!-- ════════════════════════════════════════════════════
+           TAB 3 — QUICK CALCULATOR
+           ════════════════════════════════════════════════════ -->
+      <section id="tab-quick-content" class="tab-content hidden">
+
+        <div class="max-w-md mx-auto">
+          <div class="text-center mb-6 sm:mb-8">
+            <p class="text-muted text-[10px] uppercase tracking-widest font-medium mb-2">One-shot Tool</p>
+            <h1 class="text-ink text-2xl sm:text-3xl font-bold tracking-tight">Quick Calculator</h1>
+            <p class="text-muted text-sm mt-1">Get instant attendance stats without saving.</p>
+          </div>
+
+          <div class="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-8">
+            <div class="space-y-4 sm:space-y-5">
+              <div>
+                <label class="field-label">Total Classes</label>
+                <input type="number" id="q-total" min="0" placeholder="e.g. 60"
+                  class="custom-input w-full rounded-xl sm:rounded-2xl px-4 py-3 text-ink text-sm font-medium placeholder-muted" />
+              </div>
+              <div>
+                <label class="field-label">Classes Attended</label>
+                <input type="number" id="q-attended" min="0" placeholder="e.g. 45"
+                  class="custom-input w-full rounded-xl sm:rounded-2xl px-4 py-3 text-ink text-sm font-medium placeholder-muted" />
+              </div>
+              <div>
+                <label class="field-label">Required Attendance %</label>
+                <input type="number" id="q-required" min="0" max="100" placeholder="75"
+                  class="custom-input w-full rounded-xl sm:rounded-2xl px-4 py-3 text-ink text-sm font-medium placeholder-muted" />
+              </div>
+            </div>
+
+            <p id="q-error" class="text-red-500 text-xs mt-4 hidden font-medium text-center"></p>
+
+            <button onclick="quickCalculate()"
+              class="btn-primary w-full mt-6 sm:mt-7 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-sm font-semibold tracking-wide">
+              Calculate ↗
+            </button>
+
+            <!-- Quick Result -->
+            <div id="quick-result" class="result-section mt-5 sm:mt-6 glass-result rounded-xl sm:rounded-2xl p-4 sm:p-5 hidden">
+
+              <!-- Big Percent -->
+              <div class="text-center mb-3 sm:mb-4">
+                <p class="text-muted text-[10px] uppercase tracking-widest font-medium mb-1">Current Attendance</p>
+                <p id="q-percent-display" class="text-ink text-4xl sm:text-5xl font-extrabold tracking-tight">—</p>
+                <!-- Progress Ring -->
+                <div class="flex justify-center mt-3">
+                  <div class="relative w-32 h-32 sm:w-36 sm:h-36">
+                    <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e5e5e5" stroke-width="2.5"/>
+                      <circle id="q-ring" cx="18" cy="18" r="15.9" fill="none" stroke="#111"
+                        stroke-width="2.5" stroke-dasharray="0 100" stroke-linecap="round"
+                        style="transition: stroke-dasharray 0.8s ease"/>
+                    </svg>
+                    <span id="q-ring-label" class="absolute inset-0 flex items-center justify-center text-ink font-bold text-base sm:text-lg">—</span>
+                  </div>
+                </div>
+                <div id="q-status-badge" class="inline-block mt-3 px-3 sm:px-4 py-1.5 rounded-full text-[11px] font-semibold"></div>
+              </div>
+
+              <div class="border-t border-gray-200 my-3 sm:my-4"></div>
+
+              <!-- Stats Grid -->
+              <div id="q-stats" class="grid grid-cols-2 gap-2 sm:gap-3">
+                <!-- Populated by JS -->
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════════════════════════════════════════════
+           TAB 4 — TIMETABLE
+           ════════════════════════════════════════════════════ -->
+      <section id="tab-timetable-content" class="tab-content hidden">
+
+        <!-- Timetable Upload / Setup -->
+        <div id="timetable-setup" class="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 mb-4">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h2 class="text-ink font-semibold text-base tracking-tight">My Timetable</h2>
+              <p class="text-muted text-sm mt-1">Upload an image or PDF of your class schedule</p>
+            </div>
+            <div class="flex gap-2">
+              <button id="btn-upload-timetable" class="btn-primary px-4 py-2 rounded-xl text-xs font-semibold">+ Upload</button>
+              <button id="btn-manual-timetable" class="bg-soft hover:bg-gray-300 text-ink px-4 py-2 rounded-xl text-xs font-semibold transition-colors">+ Manual Entry</button>
+            </div>
+          </div>
+
+          <div id="timetable-upload-zone" class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center cursor-pointer hover:border-ink transition-colors">
+            <div class="text-4xl mb-3">📅</div>
+            <p class="text-ink font-medium mb-1">Drag & drop your timetable</p>
+            <p class="text-muted text-sm">JPG, PNG, or PDF · click to browse</p>
+          </div>
+          <input type="file" id="timetable-file-input" accept=".jpg,.jpeg,.png,.pdf" class="hidden" />
+        </div>
+
+        <!-- Today's Timeline View -->
+        <div class="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 mb-4">
+          <div id="timetable-today-container">
+            <!-- Rendered by timetable-view.js -->
+            <div class="text-center py-12 text-muted">
+              <div class="text-5xl mb-4">📆</div>
+              <p>No timetable uploaded yet</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes Panel -->
+        <div id="timetable-notes-section" class="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 mb-4 hidden">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-ink font-semibold text-sm">Notes</h3>
+            <button id="btn-save-notes" class="text-xs bg-ink text-white px-3 py-1.5 rounded-lg font-medium hover:opacity-80 transition-opacity">Save</button>
+          </div>
+          <textarea id="timetable-notes-textarea" class="w-full rounded-xl border border-gray-200 p-3 text-sm text-ink bg-transparent resize-y focus:border-accent focus:outline-none" rows="3" placeholder="Write your notes, tasks, or homework here..."></textarea>
+        </div>
+
+        <!-- Full Timetable Modal -->
+        <div id="full-timetable-modal" role="dialog" aria-modal="true" aria-labelledby="full-tt-modal-title" class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm pt-4 pb-8 overflow-y-auto hidden">
+          <div class="glass-card rounded-3xl p-5 w-full max-w-5xl mx-4">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <h2 id="full-tt-modal-title" class="text-xl font-bold text-ink">Full Timetable</h2>
+                <p class="text-muted text-sm mt-1">Your complete weekly schedule</p>
+              </div>
+              <button id="full-tt-modal-close" class="w-8 h-8 rounded-xl hover:bg-soft/80 flex items-center justify-center text-muted">✕</button>
+            </div>
+            <div id="full-tt-content" class="space-y-4">
+              <!-- Rendered by timetable-view.js -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ── FOOTER ───────────────────────────────────────────── -->
+    <footer class="text-center py-5 sm:py-6 text-muted text-xs tracking-wide px-4">
+      AttendX · Cloud-synced · <span id="footer-user"></span>
+    </footer>
+
+    <!-- ── TOAST ────────────────────────────────────────────── -->
+    <div id="toast" class="toast-msg" aria-live="polite">Saved!</div>
+
+    <!-- Edit Subject Modal -->
+    <div id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm px-4">
+      <div class="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-7 w-full max-w-sm shadow-2xl">
+        <h3 id="edit-modal-title" class="text-ink font-semibold text-base mb-4 sm:mb-5">Edit Subject</h3>
+        <div class="space-y-3 sm:space-y-4">
+          <div>
+            <label class="field-label">Subject Name</label>
+            <input type="text" id="edit-name" class="custom-input w-full rounded-xl sm:rounded-2xl px-4 py-3 text-ink text-sm font-medium" />
+          </div>
+          <div>
+            <label class="field-label">Total Classes</label>
+            <input type="number" id="edit-total" min="0" class="custom-input w-full rounded-xl sm:rounded-2xl px-4 py-3 text-ink text-sm font-medium" />
+          </div>
+          <div>
+            <label class="field-label">Classes Attended</label>
+            <input type="number" id="edit-attended" min="0" class="custom-input w-full rounded-xl sm:rounded-2xl px-4 py-3 text-ink text-sm font-medium" />
+          </div>
+          <div>
+            <label class="field-label">Required %</label>
+            <input type="number" id="edit-required" min="0" max="100" class="custom-input w-full rounded-xl sm:rounded-2xl px-4 py-3 text-ink text-sm font-medium" />
+          </div>
+        </div>
+        <div class="flex gap-3 mt-5 sm:mt-6">
+          <button onclick="closeModal()" class="flex-1 py-3 rounded-xl sm:rounded-2xl border border-soft text-muted text-sm font-medium hover:bg-soft/60 transition-colors">Cancel</button>
+          <button onclick="saveEdit()"   class="flex-1 btn-primary py-3 rounded-xl sm:rounded-2xl text-sm font-semibold">Save</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /#app-shell -->
+
+  <!-- Data Migration Modal (shown after login when guest data exists) -->
+  <div id="migration-modal" role="dialog" aria-modal="true" aria-labelledby="migration-modal-title" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm px-4">
+    <div class="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-7 w-full max-w-sm shadow-2xl text-center">
+      <div class="text-4xl mb-4">📦</div>
+      <h3 id="migration-modal-title" class="text-ink font-bold text-lg mb-2">Local Data Found</h3>
+      <p class="text-muted text-sm mb-1">We found data saved on this device while you were in guest mode.</p>
+      <p class="text-muted text-sm mb-5">Import it to your account?</p>
+      <div class="flex gap-3">
+        <button id="btn-migration-discard" class="flex-1 py-3 rounded-xl border border-soft text-muted text-sm font-medium hover:bg-soft/60 transition-colors">Discard</button>
+        <button id="btn-migration-import" class="flex-1 btn-primary py-3 rounded-xl text-sm font-semibold">Import Data</button>
+      </div>
+      <p id="migration-status" class="text-xs text-muted mt-3 hidden"></p>
+    </div>
+  </div>
+
+  <!-- Attendance Prompt Modal (sticky bottom-right) -->
+  <div id="timetable-prompt" class="fixed bottom-6 right-6 z-50 hidden">
+    <div class="glass-card rounded-2xl p-5 shadow-2xl max-w-xs w-full border-l-4" id="prompt-card" style="border-left-color:#6366F1">
+      <div class="flex items-start justify-between mb-3">
+        <div>
+          <p class="text-ink font-bold text-sm" id="prompt-class-name">Mathematics</p>
+          <p class="text-muted text-xs mt-0.5" id="prompt-class-time">09:00 – 10:00 · A-101</p>
+        </div>
+        <button onclick="dismissAttendancePrompt()" class="text-muted hover:text-ink text-lg leading-none">&times;</button>
+      </div>
+      <p class="text-muted text-xs mb-3" id="prompt-status-msg">Class just ended. Did you attend?</p>
+      <div class="flex gap-2">
+        <button onclick="respondToPrompt('absent')" class="flex-1 py-2 rounded-xl border border-gray-300 text-muted text-sm font-medium hover:bg-red-50 hover:text-red-500 hover:border-red-300 transition-colors">✕ No</button>
+        <button onclick="respondToPrompt('attended')" class="flex-1 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition-colors">✓ Yes</button>
+      </div>
+      <p class="text-muted text-[10px] mt-2 text-center" id="prompt-countdown"></p>
+    </div>
+  </div>
+
+  <!-- JS — loaded as ES module so auth/db imports work -->
+  <script type="module" src="script.js"></script>
+
+</body>
+</html>

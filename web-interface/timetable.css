@@ -1,0 +1,157 @@
+/**
+ * AttendX — timetable.css
+ * Styles for timetable tab, upload zone, timeline, and attendance prompts.
+ */
+
+/* ── Drop Zone ─────────────────────────────────────────────── */
+.timetable-upload-zone {
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.timetable-upload-zone.drag-over {
+  border-color: var(--ink);
+  background: rgba(99, 102, 241, 0.04);
+}
+
+/* ── Timeline ─────────────────────────────────────────────── */
+.timeline-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.timeline-card:hover {
+  transform: translateX(3px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+}
+
+.timeline-card.ongoing {
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3); }
+  50%       { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.0); }
+}
+
+/* ── Now Indicator ─────────────────────────────────────────── */
+#now-indicator {
+  transition: top 0.5s ease;
+}
+
+/* ── Attendance Prompt Modal ───────────────────────────────── */
+#timetable-prompt {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#timetable-prompt.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#timetable-prompt:not(.show) {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+/* Pulse dot for ongoing class in prompt */
+.pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Status dot ────────────────────────────────────────────── */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.attended  { background: #16a34a; }
+.status-dot.absent    { background: #dc2626; }
+.status-dot.ongoing   { background: #3b82f6; animation: pulse-dot 1.5s ease-in-out infinite; }
+.status-dot.upcoming  { background: #9ca3af; }
+.status-dot.ended     { background: #d1d5db; }
+
+/* ── Timetable empty state ─────────────────────────────────── */
+.timetable-empty-icon {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* ── Scrollbar for parse list ──────────────────────────────── */
+#parse-classes-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+#parse-classes-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#parse-classes-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+}
+
+/* ── Day-wise Editor Tables ────────────────────────────────── */
+table[data-day] input {
+  font-size: 0.8125rem;
+}
+
+table[data-day] input:focus {
+  background: white;
+}
+
+.btn-del-row {
+  line-height: 1;
+}
+
+/* Each day section's last row border */
+table[data-day] tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* Notes field styling */
+.field-notes {
+  font-style: italic;
+  font-size: 0.8125rem;
+}
+
+/* ── Notes Panel ───────────────────────────────────────────── */
+#timetable-notes-textarea {
+  transition: border-color 0.2s ease;
+  min-height: 80px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+#timetable-notes-textarea:focus {
+  background: white;
+}
+
+/* ── Full Timetable Modal ─────────────────────────────────── */
+#full-tt-content > div {
+  transition: transform 0.2s ease;
+}
+
+#full-tt-content > div:hover {
+  transform: translateX(3px);
+}
+
+/* ── Responsive timetable ──────────────────────────────────── */
+@media (max-width: 480px) {
+  #timetable-prompt {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+  }
+}

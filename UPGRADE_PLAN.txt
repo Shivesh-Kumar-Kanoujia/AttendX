@@ -1,0 +1,204 @@
+You are a senior full-stack developer working on my AttendX project.
+
+IMPORTANT IMPLEMENTATION CHANGE:
+
+I DO NOT want to use Tesseract OCR or any system-level OCR dependency anymore.
+
+Remove all planned implementation related to:
+
+* pytesseract
+* Tesseract installation
+* OCR-based image parsing
+* Tesseract configuration
+* Any dependency requiring local system installation
+
+Reason:
+I want the application to remain lightweight, beginner-friendly, easy to deploy, and avoid OS-specific setup issues.
+
+Instead, redesign the timetable feature using the following architecture.
+
+---
+
+## 📂 PART 1: UPLOAD SYSTEM
+
+Allow users to upload:
+
+* Images (PNG/JPG)
+* PDFs
+
+Create a drag-and-drop upload interface.
+
+After upload:
+
+* Show preview of uploaded file
+* Store temporarily before saving
+
+---
+
+## 📄 PART 2: EXTRACTION STRATEGY
+
+Implement a simpler extraction pipeline:
+
+For PDFs:
+
+* Use PDF text extraction libraries only
+* Examples:
+
+  * PyPDF2
+  * pdfplumber
+
+For images:
+
+* Do NOT use OCR
+* Instead:
+
+1. Attempt simple structured pattern detection if possible
+2. If structure cannot be determined:
+   Show manual editing UI immediately
+
+---
+
+## ✏️ PART 3: MANUAL EDITABLE TIMETABLE
+
+After extraction:
+
+Show a timetable editor where users can:
+
+* Add subject
+* Remove subject
+* Edit subject
+* Add room
+* Add teacher
+* Edit class timing
+* Edit day
+
+Use table/grid style editing.
+
+This becomes the primary workflow.
+
+Flow:
+
+Upload file
+↓
+Extract available text
+↓
+Generate timetable preview
+↓
+Allow user correction/editing
+↓
+User confirms
+↓
+Save timetable
+
+Never auto-save extracted data.
+
+---
+
+## 📅 PART 4: SMART DAILY VIEW
+
+After timetable is saved:
+
+Show:
+
+Today's schedule:
+
+* Subject
+* Start time
+* End time
+* Teacher
+* Room
+
+Highlight:
+
+* Completed classes
+* Ongoing class
+* Upcoming classes
+
+---
+
+## 🧠 PART 5: ATTENDANCE AUTOMATION
+
+For every class:
+
+When class end time passes:
+
+Prompt:
+
+"Did you attend this class?"
+
+Buttons:
+
+* Yes
+* No
+
+If yes:
+
+* Increase attended count
+* Increase total count
+
+If no:
+
+* Increase total count only
+
+Automatically update:
+
+* Attendance percentage
+* Analytics
+* Prediction logic
+* Safe bunk calculations
+
+---
+
+## 💾 PART 6: STORAGE
+
+Guest Mode:
+
+* localStorage
+
+Logged-in users:
+
+* Firebase Firestore
+
+Structure:
+
+users/{uid}/timetable
+users/{uid}/attendance
+users/{uid}/logs
+
+---
+
+## ⚙️ PART 7: BACKEND CHANGES
+
+Remove:
+
+* Tesseract dependencies
+* pytesseract
+* Pillow OCR logic
+
+Update requirements accordingly.
+
+Keep backend lightweight using:
+
+FastAPI
+PyPDF2/pdfplumber only
+
+---
+
+## 📁 OUTPUT FORMAT
+
+Provide complete file-wise modifications.
+
+Clearly specify:
+
+[NEW]
+[MODIFY]
+[REMOVE]
+
+for each file.
+
+Do not rewrite unrelated code.
+
+Only update affected files.
+
+Goal:
+Create a real-world, deployable timetable-based attendance system without OCR dependencies and with editable confirmation flow.
