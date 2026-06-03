@@ -1,9 +1,8 @@
 {
-  "rootDirectory": "web-interface",
-  "buildCommand": "node inject-env.js",
-  "outputDirectory": ".",
+  "buildCommand": "cd web-interface && node inject-env.js",
+  "outputDirectory": "web-interface",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/web-interface/index.html" }
   ],
   "github": {
     "silent": true
